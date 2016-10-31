@@ -1,0 +1,82 @@
+---
+title       : Shiny App - mtcars Revisited
+subtitle    : MPG vs Engine Displacement
+author      : mfb
+job         : 
+framework   : io2012   # {io2012, html5slides, shower, dzslides, ...}
+highlighter : prettify     # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## About the Shiny App
+
+The app revisits the mtcars data set where the user can find the predicted
+values of MPG for a given engine displacement in cubic inches.
+
+The predictions are based on three possible models based on subsets of the
+data and the entire data set.
+
+---
+
+## About the Data Set
+
+The mtcars data set contains 32 observations for 1973-74 models of cars 
+from Motor Trend magazine.  The fuel consumption (MPG = miles/gallon) 
+along with 10 other variables are part of this data set.
+
+---
+
+## Data Subsets
+
+Many variables can contribute to fuel consumption, but this app focuses only
+on transmission type.  As a result, three prediction models are considered:
+
+>1. Automatic Transmission Only using a linear model fit
+>2. Manual Transmission Only using a 3rd order polynomial fit
+>3. All Data using a 2nd order polynomial fit
+
+---
+
+## Prediction Models
+
+```{r echo=FALSE}
+#create data frame of automatic data only
+mtcarauto<-mtcars[mtcars$am==0,]
+#create data frame of manual data only
+mtcarman<-mtcars[mtcars$am==1,]
+#linear fit of automatic data
+model_auto<-lm(mpg ~ disp, data=mtcarauto)
+#3rd order polynomial fit of manual data
+model_man<-lm(mpg ~ disp + I(disp^2) + I(disp^3), data=mtcarman)
+#2nd order polynomial fit of all data
+model_all<-lm(mpg ~ disp + I(disp^2), data=mtcars)
+
+plot(mtcars$disp, mtcars$mpg, xlab="Displacement (cu. in.)", ylab="MPG", 
+xlim=c(0,500), ylim=c(0,60), main="MPG vs. Engine Displacement", pch=16,
+col=ifelse(mtcars$am==0,"red","blue"))
+    
+#plot model fits - automatic transmission model
+lines_auto<-predict(model_auto,newdata=data.frame(disp=0:500))
+lines(0:500,lines_auto, col="red", lty=2, lwd=2)
+legend(100, 60, "Prediction based on Automatic", lty=2,
+col="red", cex=1.2)
+
+#plot model fits - manual transmission model
+lines_man<-predict(model_man,newdata=data.frame(disp=0:500))
+lines(0:500, lines_man, col="blue", lty=3, lwd=2)
+legend(100, 50, "Prediction based on Manual", lty=3,
+col="blue", cex=1.2)
+
+#plot model fits - all data model
+lines_all<-predict(model_all,newdata=data.frame(disp=0:500))
+lines(0:500, lines_all, col="black", lty=1, lwd=2)
+legend(100, 40, "Prediction based on All Data", lty=1,
+col="black", cex=1.2)
+
+legend(0, 10, c("Data-Automatic", "Data-Manual"), pch=16, col=c("red", "blue"), cex=1)
+```
+
+App identifies user defined point(s) on curve(s).
